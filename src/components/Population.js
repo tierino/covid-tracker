@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
 import { connect } from "react-redux";
-import moment from "moment";
 import numeral from "numeral";
 
 import { fetchCurStats } from "../actions";

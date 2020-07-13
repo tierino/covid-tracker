@@ -1,8 +1,9 @@
 import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import moment from "moment";
+import numeral from "numeral";
 
-import { fetchCurStats } from "../actions";
+import { fetchHistory } from "../actions";
 
 import { makeStyles, withStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
@@ -16,6 +17,10 @@ import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
 import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import MuiAccordion from "@material-ui/core/Accordion";
+import ArrowUpwardIcon from "@material-ui/icons/ArrowUpward";
+import ArrowDownwardIcon from "@material-ui/icons/ArrowDownward";
+import SentimentVeryDissatisfiedIcon from "@material-ui/icons/SentimentVeryDissatisfied";
+import SentimentVerySatisfiedIcon from "@material-ui/icons/SentimentVerySatisfied";
 
 import { faChartLine } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -62,23 +67,125 @@ const AccordionDetails = withStyles((theme) => ({
 }))(MuiAccordionDetails);
 
 const useStyles = makeStyles((theme) => ({
-  paper: {
-    padding: theme.spacing(2),
-    textAlign: "center",
+  labels: {
+    display: "flex",
+    padding: 0,
+    justifyContent: "space-between",
   },
-  statsContainer: {
+  bar: {
+    display: "flex",
     padding: 0,
   },
-  date: {
-    color: "grey",
+  subheading: {
+    textAlign: "center",
+    marginTop: theme.spacing(1),
   },
   icon: {
     marginRight: theme.spacing(1),
+  },
+  loaderContainer: {
+    textAlign: "center",
+    paddingTop: theme.spacing(2),
+  },
+  textWithIcon: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
   },
 }));
 
 function Progression(props) {
   const classes = useStyles();
+
+  useEffect(() => {
+    props.fetchHistory(props.selectedCountry, dateOneWeekAgo());
+  }, [props.selectedCountry]);
+
+  const dateOneWeekAgo = () => {
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+    return moment(oneWeekAgo).format("YYYY-MM-DD");
+  };
+
+  const renderStatsComparison = () => {
+    let activeCasesDifference =
+      props.curStats.cases.active - props.lastWeekStats.cases.active;
+
+    console.log(activeCasesDifference);
+
+    // MORE CASES THAN LAST WEEK
+    if (activeCasesDifference > 0) {
+      return (
+        <div>
+          <Typography>
+            <div className={classes.textWithIcon}>
+              <SentimentVeryDissatisfiedIcon style={{ marginRight: "4px" }} />{" "}
+              Doing worse than last week There are:
+            </div>
+          </Typography>
+          <Typography
+            variant="h5"
+            className={classes.subheading}
+            color="secondary"
+          >
+            <div className={classes.textWithIcon}>
+              {numeral(activeCasesDifference).format("0,0")}
+              <ArrowUpwardIcon />
+            </div>
+          </Typography>
+          <Typography>
+            ...more active cases than this time last week. That's a{" "}
+            {numeral(
+              (activeCasesDifference / props.lastWeekStats.cases.active) * 100
+            ).format("0.00")}
+            % increase in active cases.
+          </Typography>
+        </div>
+      );
+      // LESS CASES THAN LAST WEEK
+    } else if (activeCasesDifference < 0) {
+      activeCasesDifference *= -1;
+      return (
+        <div>
+          <Typography>
+            <div className={classes.textWithIcon}>
+              <SentimentVerySatisfiedIcon style={{ marginRight: "4px" }} />
+              Doing better than last week. There are:
+            </div>
+          </Typography>
+          <Typography
+            variant="h5"
+            className={classes.subheading}
+            style={{ color: "#64dd17" }}
+          >
+            <div className={classes.textWithIcon}>
+              {numeral(activeCasesDifference).format("0,0")}
+              <ArrowDownwardIcon />
+            </div>
+          </Typography>
+          <Typography>
+            ...less active cases than this time last week. That's a{" "}
+            {numeral(
+              (activeCasesDifference / props.lastWeekStats.cases.active) * 100
+            ).format("0.00")}
+            % decrease in active cases.
+          </Typography>
+        </div>
+      );
+      // SAME CASES AS LAST WEEK
+    } else {
+      return (
+        <div>
+          <Typography className={classes.subheading}>
+            There are the same amount of active cases as this time last week.
+          </Typography>
+        </div>
+      );
+    }
+  };
+
+  console.log(dateOneWeekAgo());
 
   return (
     <Accordion variant="outlined">
@@ -93,10 +200,24 @@ function Progression(props) {
         </Typography>
       </AccordionSummary>
       <AccordionDetails>
-        <Typography>Progression stats.</Typography>
+        {props.lastWeekStats.cases ? (
+          renderStatsComparison()
+        ) : (
+          <Container className={classes.loaderContainer}>
+            <CircularProgress />
+          </Container>
+        )}
       </AccordionDetails>
     </Accordion>
   );
 }
 
-export default connect(null)(Progression);
+function mapStateToProps(state) {
+  return {
+    selectedCountry: state.selectedCountry,
+    curStats: state.currentStats,
+    lastWeekStats: state.lastWeekStats,
+  };
+}
+
+export default connect(mapStateToProps, { fetchHistory })(Progression);

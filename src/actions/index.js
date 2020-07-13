@@ -28,15 +28,20 @@ export const fetchCountries = () => async (dispatch) => {
 };
 
 export const fetchHistory = (country, date) => async (dispatch) => {
+  console.log(country);
+  console.log(date);
+
   const response = await covidApi.get("/history", {
     params: {
       country: country,
-      date: date,
+      day: date,
     },
     headers: apiHeaders,
   });
 
-  dispatch({ type: FETCH_CUR_STATS, payload: response.data.response[0] });
+  console.log(response);
+
+  dispatch({ type: FETCH_HISTORY, payload: response.data.response[0] });
 };
 
 export const setCountry = (country) => {

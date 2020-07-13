@@ -44,6 +44,8 @@ export default ({ children }) => {
       <Container className={classes.infoContainer}>
         <Typography className={classes.info} variant="caption">
           Data provided by api-sports. Updates every 15 minutes.
+          <br /> Note: some countries may have incomplete/missing data on this
+          API.
         </Typography>
       </Container>
     </ThemeProvider>
