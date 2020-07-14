@@ -112,8 +112,6 @@ function Progression(props) {
     let activeCasesDifference =
       props.curStats.cases.active - props.lastWeekStats.cases.active;
 
-    console.log(activeCasesDifference);
-
     // MORE CASES THAN LAST WEEK
     if (activeCasesDifference > 0) {
       return (
@@ -121,7 +119,7 @@ function Progression(props) {
           <Typography>
             <div className={classes.textWithIcon}>
               <SentimentVeryDissatisfiedIcon style={{ marginRight: "4px" }} />{" "}
-              Doing worse than last week There are:
+              Doing worse than last week. There are:
             </div>
           </Typography>
           <Typography
