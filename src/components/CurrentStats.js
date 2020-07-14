@@ -63,8 +63,6 @@ function CurrentStats(props) {
     props.fetchCurStats(props.selectedCountry);
   }, [props.selectedCountry]);
 
-  console.log(props.curStats);
-
   return props.curStats.cases ? (
     <Grid className={classes.mainGrid} item md={7} sm={10} xs={12}>
       <Container className={classes.statsContainer}>

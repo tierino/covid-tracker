@@ -185,8 +185,6 @@ function Progression(props) {
     }
   };
 
-  console.log(dateOneWeekAgo());
-
   return (
     <Accordion variant="outlined">
       <AccordionSummary
